@@ -14,9 +14,13 @@ function App() {
     minuteOption: "at",
     selectedAtMinutes: [],
     selectedEveryMinutes: "",
+    cronString: ""
   });
-  let daysOptions = [...Array(31+1).keys()].slice(1).map(val => <option value={val} key={val}>{val}</option>);
-  let hourOptions = [...Array(24).keys()].map(val => <option value={val} key={val}>{val.toString().padStart(2,'0')}</option>);
+  // TODO: Refactor to use periodOptions everywhere needed
+  let periodOptions = ["hour", "day", "week", "month", "year"];
+  let daysOptions = [...Array(31 + 1).keys()].slice(1).map(val => <option value={val} key={val}>{val}</option>);
+  let hourOptions = [...Array(24).keys()].map(val => <option value={val}
+                                                             key={val}>{val.toString().padStart(2, '0')}</option>);
   let minutesOptions = [...Array(60).keys()].map(val => <option value={val} key={val}>{val}</option>);
   const handleChange = (event) => {
     const {name, value} = event.target;
@@ -33,7 +37,15 @@ function App() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    alert(Object.keys(formData).map(function (k) {
+    formData.cronString = [
+      formData.minuteOption === "at" ? formData.selectedAtMinutes.join(',') : "*/" + formData.selectedEveryMinutes,
+      periodOptions.indexOf(formData.selectedPeriod) > 0 ? formData.hourOption === "at" ? formData.selectedAtHours.join(',') : "*/" + formData.selectedEveryHours : "*",
+      periodOptions.indexOf(formData.selectedPeriod) > 2 ? formData.monthOption === "on" ? formData.daysOfMonth.join(',') : "*/" + formData.everyNthDay : "*",
+      periodOptions.indexOf(formData.selectedPeriod) > 3 ? formData.selectedMonth.join(',') : "*",
+      periodOptions.indexOf(formData.selectedPeriod) > 1 ? formData.selectedDayOfWeek.sort().join(',') : "*",
+    ].join(' ');
+    document.getElementById("cronStrIO").value = formData.cronString;
+    console.log(Object.keys(formData).map(function (k) {
         return k + ":" + formData[k]
       }).join("\n")
     );
@@ -45,7 +57,7 @@ function App() {
           <form onSubmit={handleSubmit}>
             <div className="form-group row">
               <label className="col-form-label">Every</label>
-              <div className="col-sm-2">
+              <div className="col-sm-3">
                 <select className="form-control" name="selectedPeriod" value={formData.selectedPeriod}
                         onChange={handleChange}>
                   <option value="year">Year</option>
@@ -53,7 +65,6 @@ function App() {
                   <option value="week">Week</option>
                   <option value="day">Day</option>
                   <option value="hour">Hour</option>
-                  <option value="minute">Minute</option>
                 </select>
               </div>
             </div>
@@ -96,7 +107,8 @@ function App() {
               </div>
               <div style={{display: formData.monthOption === "on" ? 'none' : 'block'}}
                    className="form-outline col-sm-2 ml-2">
-                <input type="number" min={1} max={31} className="form-control" name="everyNthDay" value={formData.everyNthDay}
+                <input type="number" min={1} max={31} className="form-control" name="everyNthDay"
+                       value={formData.everyNthDay}
                        onChange={handleChange}/>
               </div>
               <label style={{display: formData.monthOption === "on" ? 'none' : 'block'}}
@@ -120,7 +132,7 @@ function App() {
               </div>
             </div>
             <div className="form-group row"
-                 style={{display: (formData.selectedPeriod !== "minute") ? 'flex' : 'none'}}>
+                 style={{display: (formData.selectedPeriod !== "hour") ? 'flex' : 'none'}}>
               <div className="col-sm-2-ml-0">
                 <select className="form-control" name="hourOption" value={formData.hourOption}
                         onChange={handleChange}>
@@ -136,8 +148,8 @@ function App() {
               </div>
               <div style={{display: formData.hourOption === "at" ? 'none' : 'block'}}
                    className="form-outline col-sm-2 ml-2">
-                <input type="number" min={1} max={23} className="form-control" name="selectedEveryHours" value={formData.selectedEveryHours}
-                       onChange={handleChange}/>
+                <input type="number" min={1} max={23} className="form-control" name="selectedEveryHours"
+                       value={formData.selectedEveryHours} onChange={handleChange}/>
               </div>
               <label style={{display: formData.hourOption === "at" ? 'none' : 'block'}}
                      className="col-form-label">hours</label>
@@ -152,15 +164,16 @@ function App() {
                 </select>
               </div>
               <div className="col-sm-4" style={{display: formData.minuteOption === "at" ? 'block' : 'none'}}>
-                <select className="selectpicker form-control" name="selectedAtMinutes" value={formData.selectedAtMinutes}
+                <select className="selectpicker form-control" name="selectedAtMinutes"
+                        value={formData.selectedAtMinutes}
                         multiple={true} onChange={handleMultipleChange}>
                   {minutesOptions}
                 </select>
               </div>
               <div style={{display: formData.minuteOption === "at" ? 'none' : 'block'}}
                    className="form-outline col-sm-2 ml-2">
-                <input type="number" min={1} max={59} className="form-control" name="selectedEveryMinutes" value={formData.selectedEveryMinutes}
-                       onChange={handleChange}/>
+                <input type="number" min={1} max={59} className="form-control" name="selectedEveryMinutes"
+                       value={formData.selectedEveryMinutes} onChange={handleChange}/>
               </div>
               <label style={{display: formData.minuteOption === "at" ? 'none' : 'block'}}
                      className="col-form-label">minutes</label>
@@ -171,6 +184,12 @@ function App() {
               </button>
             </div>
           </form>
+          <div className="form-row">
+            <label className="col-form-label">Cron string: </label>
+            <div className="form-outline col-sm-10">
+              <input id="cronStrIO" type={"text"} className="form-control" name="cronString"/>
+            </div>
+          </div>
         </div>
       </div>
     </div>
