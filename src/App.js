@@ -7,8 +7,17 @@ function App() {
     monthOption: "on",
     daysOfMonth: [],
     everyNthDay: "",
-    selectedDayOfWeek: []
+    selectedDayOfWeek: [],
+    hourOption: "at",
+    selectedAtHours: [],
+    selectedEveryHours: "",
+    minuteOption: "at",
+    selectedAtMinutes: [],
+    selectedEveryMinutes: "",
   });
+  let daysOptions = [...Array(31+1).keys()].slice(1).map(val => <option value={val} key={val}>{val}</option>);
+  let hourOptions = [...Array(24).keys()].map(val => <option value={val} key={val}>{val.toString().padStart(2,'0')}</option>);
+  let minutesOptions = [...Array(60).keys()].map(val => <option value={val} key={val}>{val}</option>);
   const handleChange = (event) => {
     const {name, value} = event.target;
     setFormData((prevFormData) => ({...prevFormData, [name]: value}));
@@ -29,7 +38,6 @@ function App() {
       }).join("\n")
     );
   };
-
   return (
     <div className="container">
       <div className="row mt-5">
@@ -80,40 +88,10 @@ function App() {
                   <option value="every">every</option>
                 </select>
               </div>
-              <div className="col-sm-4" style={{display: formData.monthOption === "on" ? 'block' : 'none'}}>
+              <div className="col-sm-4 ml-1" style={{display: formData.monthOption === "on" ? 'block' : 'none'}}>
                 <select className="selectpicker form-control" name="daysOfMonth" value={formData.daysOfMonth}
                         multiple={true} onChange={handleMultipleChange}>
-                  <option value="1">01</option>
-                  <option value="2">02</option>
-                  <option value="3">03</option>
-                  <option value="4">04</option>
-                  <option value="5">05</option>
-                  <option value="6">06</option>
-                  <option value="7">07</option>
-                  <option value="8">08</option>
-                  <option value="9">09</option>
-                  <option value="10">10</option>
-                  <option value="11">11</option>
-                  <option value="12">12</option>
-                  <option value="13">13</option>
-                  <option value="14">14</option>
-                  <option value="15">15</option>
-                  <option value="16">16</option>
-                  <option value="17">17</option>
-                  <option value="18">18</option>
-                  <option value="19">19</option>
-                  <option value="20">20</option>
-                  <option value="21">21</option>
-                  <option value="22">22</option>
-                  <option value="23">23</option>
-                  <option value="24">24</option>
-                  <option value="25">25</option>
-                  <option value="26">26</option>
-                  <option value="27">27</option>
-                  <option value="28">28</option>
-                  <option value="29">29</option>
-                  <option value="30">30</option>
-                  <option value="31">31</option>
+                  {daysOptions}
                 </select>
               </div>
               <div style={{display: formData.monthOption === "on" ? 'none' : 'block'}}
@@ -141,6 +119,54 @@ function App() {
                   <option value="0">Sunday</option>
                 </select>
               </div>
+            </div>
+            <div className="form-group row"
+                 style={{display: (formData.selectedPeriod !== "minute") ? 'flex' : 'none'}}>
+              <div className="col-sm-2-ml-0">
+                <select className="form-control" name="hourOption" value={formData.hourOption}
+                        onChange={handleChange}>
+                  <option value="at">at</option>
+                  <option value="every">every</option>
+                </select>
+              </div>
+              <div className="col-sm-4" style={{display: formData.hourOption === "at" ? 'block' : 'none'}}>
+                <select className="selectpicker form-control" name="selectedAtHours" value={formData.selectedAtHours}
+                        multiple={true} onChange={handleMultipleChange}>
+                  {hourOptions}
+                </select>
+              </div>
+              <div style={{display: formData.hourOption === "at" ? 'none' : 'block'}}
+                   className="form-outline col-sm-2 ml-2">
+                {/*TODO: Set min max val*/}
+                <input type="number" className="form-control" name="selectedEveryHours" value={formData.selectedEveryHours}
+                       onChange={handleChange}/>
+              </div>
+              <label style={{display: formData.hourOption === "at" ? 'none' : 'block'}}
+                     className="col-form-label">hours</label>
+            </div>
+            <div className="form-group row"
+                 style={{display: 'flex'}}>
+              <div className="col-sm-2-ml-0">
+                <select className="form-control" name="minuteOption" value={formData.minuteOption}
+                        onChange={handleChange}>
+                  <option value="at">at</option>
+                  <option value="every">every</option>
+                </select>
+              </div>
+              <div className="col-sm-4" style={{display: formData.minuteOption === "at" ? 'block' : 'none'}}>
+                <select className="selectpicker form-control" name="selectedAtMinutes" value={formData.selectedAtMinutes}
+                        multiple={true} onChange={handleMultipleChange}>
+                  {minutesOptions}
+                </select>
+              </div>
+              <div style={{display: formData.minuteOption === "at" ? 'none' : 'block'}}
+                   className="form-outline col-sm-2 ml-2">
+                {/*TODO: Set min max val*/}
+                <input type="number" className="form-control" name="selectedEveryMinutes" value={formData.selectedEveryMinutes}
+                       onChange={handleChange}/>
+              </div>
+              <label style={{display: formData.minuteOption === "at" ? 'none' : 'block'}}
+                     className="col-form-label">minutes</label>
             </div>
             <div className="form-group">
               <button className="btn btn-primary mt-2" type="submit">
