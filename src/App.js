@@ -96,8 +96,7 @@ function App() {
               </div>
               <div style={{display: formData.monthOption === "on" ? 'none' : 'block'}}
                    className="form-outline col-sm-2 ml-2">
-                {/*TODO: Set min max val*/}
-                <input type="number" className="form-control" name="everyNthDay" value={formData.everyNthDay}
+                <input type="number" min={1} max={31} className="form-control" name="everyNthDay" value={formData.everyNthDay}
                        onChange={handleChange}/>
               </div>
               <label style={{display: formData.monthOption === "on" ? 'none' : 'block'}}
@@ -137,8 +136,7 @@ function App() {
               </div>
               <div style={{display: formData.hourOption === "at" ? 'none' : 'block'}}
                    className="form-outline col-sm-2 ml-2">
-                {/*TODO: Set min max val*/}
-                <input type="number" className="form-control" name="selectedEveryHours" value={formData.selectedEveryHours}
+                <input type="number" min={1} max={23} className="form-control" name="selectedEveryHours" value={formData.selectedEveryHours}
                        onChange={handleChange}/>
               </div>
               <label style={{display: formData.hourOption === "at" ? 'none' : 'block'}}
@@ -161,8 +159,7 @@ function App() {
               </div>
               <div style={{display: formData.minuteOption === "at" ? 'none' : 'block'}}
                    className="form-outline col-sm-2 ml-2">
-                {/*TODO: Set min max val*/}
-                <input type="number" className="form-control" name="selectedEveryMinutes" value={formData.selectedEveryMinutes}
+                <input type="number" min={1} max={59} className="form-control" name="selectedEveryMinutes" value={formData.selectedEveryMinutes}
                        onChange={handleChange}/>
               </div>
               <label style={{display: formData.minuteOption === "at" ? 'none' : 'block'}}
