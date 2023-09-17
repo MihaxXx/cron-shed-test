@@ -44,12 +44,53 @@ function App() {
       periodOptions.indexOf(formData.selectedPeriod) > 3 ? formData.selectedMonth.join(',') : "*",
       periodOptions.indexOf(formData.selectedPeriod) > 1 ? formData.selectedDayOfWeek.sort().join(',') : "*",
     ].join(' ');
+    document.getElementById("errorLabel").value = "";
     document.getElementById("cronStrIO").value = formData.cronString;
     console.log(Object.keys(formData).map(function (k) {
         return k + ":" + formData[k]
       }).join("\n")
     );
   };
+  const validateCronExpr = (str) => str.trim().match(/((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5})/)?.[0] === str.trim()
+  const range = (start, stop, step) =>
+    Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
+  const convertRangeToList = (fieldVal) => {
+    if(!fieldVal.includes('-'))
+      return fieldVal;
+    else {
+      let start = fieldVal.substring(0, fieldVal.indexOf('-'));
+      let end = fieldVal.substring(fieldVal.indexOf('-')+1)
+      return range(start, end, 1).join(',');
+    }
+  }
+
+  function fillMinutes(fields, errorLabel) {
+    if (fields[0].includes('/')) {
+      if (!fields[0].startsWith('*/')) {
+        errorLabel.value = "Error: cron format string is richer than supported";
+        return;
+      } else {
+        formData.minuteOption = "every";
+        formData.selectedEveryMinutes = fields[0].substring(2);
+      }
+    } else {
+      formData.minuteOption = "at";
+      formData.selectedAtMinutes = convertRangeToList(fields[0]);
+    }
+  }
+
+  const handleButtonClick = (event) => {
+    event.preventDefault();
+    let errorLabel = document.getElementById("errorLabel");
+    let cronStrIO = document.getElementById("cronStrIO");
+    if (!validateCronExpr(cronStrIO))
+    {
+      errorLabel.value = "Error: invalid cron format string";
+      return;
+    }
+    let fields = cronStrIO.value.split(' ');
+    fillMinutes(fields, errorLabel);
+  }
   return (
     <div className="container">
       <div className="row mt-5">
@@ -182,6 +223,9 @@ function App() {
               <button className="btn btn-primary mt-2" type="submit">
                 Save
               </button>
+              <button className="btn btn-primary mt-2 ml-3" type="button" onClick={handleButtonClick}>
+                Load
+              </button>
             </div>
           </form>
           <div className="form-row">
@@ -189,6 +233,9 @@ function App() {
             <div className="form-outline col-sm-10">
               <input id="cronStrIO" type={"text"} className="form-control" name="cronString"/>
             </div>
+          </div>
+          <div className="form-row">
+            <label className="col-form-label" id="errorLabel"></label>
           </div>
         </div>
       </div>
