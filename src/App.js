@@ -51,46 +51,64 @@ function App() {
       }).join("\n")
     );
   };
-  const validateCronExpr = (str) => str.trim().match(/((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5})/)?.[0] === str.trim()
-  const range = (start, stop, step) =>
-    Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
-  const convertRangeToList = (fieldVal) => {
-    if(!fieldVal.includes('-'))
-      return fieldVal;
-    else {
-      let start = fieldVal.substring(0, fieldVal.indexOf('-'));
-      let end = fieldVal.substring(fieldVal.indexOf('-')+1)
-      return range(start, end, 1).join(',');
-    }
-  }
-
-  function fillMinutes(fields, errorLabel) {
-    if (fields[0].includes('/')) {
-      if (!fields[0].startsWith('*/')) {
-        errorLabel.value = "Error: cron format string is richer than supported";
-        return;
-      } else {
-        formData.minuteOption = "every";
-        formData.selectedEveryMinutes = fields[0].substring(2);
-      }
-    } else {
-      formData.minuteOption = "at";
-      formData.selectedAtMinutes = convertRangeToList(fields[0]);
-    }
-  }
 
   const handleButtonClick = (event) => {
     event.preventDefault();
     let errorLabel = document.getElementById("errorLabel");
     let cronStrIO = document.getElementById("cronStrIO");
-    if (!validateCronExpr(cronStrIO))
+    if (!validateCronExpr(cronStrIO.value))
     {
       errorLabel.value = "Error: invalid cron format string";
       return;
     }
+    console.log('validated')
     let fields = cronStrIO.value.split(' ');
-    fillMinutes(fields, errorLabel);
+    fillRowFromField(fields[0], errorLabel, 'minuteOption', 'selectedEveryMinutes', 'selectedAtMinutes', 'at');
+    fillRowFromField(fields[1], errorLabel, 'hourOption', 'selectedEveryHours', 'selectedAtHours', 'at');
+    fillRowFromField(fields[2], errorLabel, 'hourOption', 'everyNthDay', 'daysOfMonth', 'on');
+    fillRowFromFieldNonPeriodic(fields[3], errorLabel, 'selectedMonth');
+    fillRowFromFieldNonPeriodic(fields[4], errorLabel, 'selectedDayOfWeek');
+    setFormData({ ...formData,'selectedPeriod': 'year' });
   }
+
+  const validateCronExpr = (str) => str.trim().match(/((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5})/)?.[0] === str.trim()
+  const range = (start, stop, step) =>
+    Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
+  const convertRangeToList = (fieldVal) => {
+    if(!fieldVal.includes('-'))
+      return [fieldVal];
+    else {
+      let start = fieldVal.substring(0, fieldVal.indexOf('-'));
+      let end = fieldVal.substring(fieldVal.indexOf('-')+1)
+      return range(start, end, 1).map(val => val.toString());
+    }
+  }
+
+  function fillRowFromField(field, errorLabel, option, every, at, preposition) {
+    if (field.includes('/')) {
+      if (!field.startsWith('*/')) {
+        errorLabel.value = "Error: cron format string is richer than supported";
+        return;
+      } else {
+        setFormData({ ...formData,[option]: "every" });
+        setFormData({ ...formData,[every]: field.substring(2) });
+      }
+    } else {
+      setFormData({ ...formData,[option]: preposition });
+      let t = { ...formData,[at]: convertRangeToList(field) };
+      setFormData(t);
+    }
+  }
+
+  const fillRowFromFieldNonPeriodic = (field, errorLabel, at) => {
+    if (field.includes('/')) {
+        errorLabel.value = "Error: cron format string is richer than supported";
+        return;
+    } else {
+      let t = { ...formData,[at]: convertRangeToList(field) };
+      setFormData(t);
+    }
+  };
   return (
     <div className="container">
       <div className="row mt-5">
