@@ -101,24 +101,20 @@ function App() {
       $('.selectpicker').selectpicker('render')
     });
   }
-  //https://regexr.com/3bvl1
+  //https://regexr.com/3bvl1, needs change to allow list of ranges
   const cronRegEx = /^((?:\*|[0-5]?[0-9](?:(?:-[0-5]?[0-9])|(?:,[0-5]?[0-9])+)?)(?:\/[0-9]+)?)\s+((?:\*|(?:1?[0-9]|2[0-3])(?:(?:-(?:1?[0-9]|2[0-3]))|(?:,(?:1?[0-9]|2[0-3]))+)?)(?:\/[0-9]+)?)\s+((?:\*|(?:[1-9]|[1-2][0-9]|3[0-1])(?:(?:-(?:[1-9]|[1-2][0-9]|3[0-1]))|(?:,(?:[1-9]|[1-2][0-9]|3[0-1]))+)?)(?:\/[0-9]+)?)\s+((?:\*|(?:[1-9]|1[0-2])(?:(?:-(?:[1-9]|1[0-2]))|(?:,(?:[1-9]|1[0-2]))+)?)(?:\/[0-9]+)?)\s+((?:\*|[0-7](?:-[0-7]|(?:,[0-7])+)?)(?:\/[0-9]+)?)$/;
   const validateCronExpr = (str) => str.trim().match(cronRegEx)?.[0] === str.trim()
   const range = (start, stop, step) =>
     Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
-  const convertRangeToList = (fieldVal, replaceSeven= false) => {
-    let list;
-    if(!fieldVal.includes('-'))
-      list = fieldVal.split(',');
-    else {
-      if(fieldVal.includes(','))
-        list = fieldVal.split(',').map(val => convertRangeToList(val,replaceSeven)).flat(1);
-      else {
-        let start = fieldVal.substring(0, fieldVal.indexOf('-'));
-        let end = fieldVal.substring(fieldVal.indexOf('-') + 1)
-        list = range(parseInt(start), parseInt(end), 1).map(val => val.toString());
-      }
-    }
+
+  function convertRangeToList(fieldVal) {
+    let start = fieldVal.substring(0, fieldVal.indexOf('-'));
+    let end = fieldVal.substring(fieldVal.indexOf('-') + 1)
+    return range(parseInt(start), parseInt(end), 1).map(val => val.toString());
+  }
+
+  const convertFieldNumbersToList = (fieldVal, replaceSeven= false) => {
+    let list = fieldVal.split(',').map(val => val.includes('-')? convertRangeToList(val) : [val] ).flat(1).sort();
     console.log("fieldVal:", fieldVal,", list:", list);
     if(replaceSeven) {
       let index = list.indexOf('7');
@@ -145,7 +141,7 @@ function App() {
         newValues = {...newValues, [at]: []};
       } else {
         newValues = {...newValues, [option]: preposition};
-        newValues = {...newValues, [at]: convertRangeToList(field)};
+        newValues = {...newValues, [at]: convertFieldNumbersToList(field)};
       }
     }
     console.log(newValues);
@@ -160,7 +156,7 @@ function App() {
       if(field==="*")
         newValues = {...newValues, [at]: []};
       else
-        newValues = {...newValues, [at]: convertRangeToList(field, replaceSeven)};
+        newValues = {...newValues, [at]: convertFieldNumbersToList(field, replaceSeven)};
     }
     return newValues;
   };
