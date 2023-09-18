@@ -63,7 +63,7 @@ function App() {
         (formData.selectedDayOfWeek.length > 0 ? formData.selectedDayOfWeek.sort().join(',') : "*")
         : "*",
     ].join(' ');
-    document.getElementById("errorLabel").value = "";
+    document.getElementById("errorLabel").innerText = "";
     document.getElementById("cronStrIO").value = formData.cronString;
     console.log(Object.keys(formData).map(function (k) {
         return k + ":" + formData[k]
@@ -77,7 +77,7 @@ function App() {
     let cronStrIO = document.getElementById("cronStrIO");
     if (!validateCronExpr(cronStrIO.value))
     {
-      errorLabel.value = "Error: invalid cron format string";
+      errorLabel.innerText = "Error: invalid cron format string";
       console.log("Error: invalid cron format string");
       return;
     }
@@ -116,7 +116,7 @@ function App() {
     let newValues = {};
     if (field.includes('/')) {
       if (!field.startsWith('*/')) {
-        errorLabel.value = "Error: cron format string is richer than supported";
+        errorLabel.innerText = "Error: cron format string is richer than supported";
       } else {
         newValues = { ...newValues,[option]: "every" };
         newValues = {...newValues,[every]: field.substring(2)};
@@ -138,7 +138,7 @@ function App() {
   const fillRowFromFieldNonPeriodic = (field, errorLabel, at) => {
     let newValues = {};
     if (field.includes('/')) {
-        errorLabel.value = "Error: cron format string is richer than supported";
+        errorLabel.innerText = "Error: cron format string is richer than supported";
     } else {
       if(field==="*")
         newValues = {...newValues, [at]: []};
