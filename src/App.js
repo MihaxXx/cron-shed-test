@@ -83,6 +83,7 @@ function App() {
     }
     console.log('validated')
     let fields = cronStrIO.value.split(' ');
+    if(fields[4]==="7") fields[4]="0";//support reading sunday not only as 0 but as 7 too
     let update1 = fillRowFromField(fields[0], errorLabel, 'minuteOption', 'selectedEveryMinutes', 'selectedAtMinutes', 'at');
     let update2 = fillRowFromField(fields[1], errorLabel, 'hourOption', 'selectedEveryHours', 'selectedAtHours', 'at');
     let update3 = fillRowFromField(fields[2], errorLabel, 'monthOption', 'everyNthDay', 'daysOfMonth', 'on');
