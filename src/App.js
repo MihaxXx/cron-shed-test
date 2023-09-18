@@ -111,11 +111,15 @@ function App() {
     if(!fieldVal.includes('-'))
       list = fieldVal.split(',');
     else {
-      let start = fieldVal.substring(0, fieldVal.indexOf('-'));
-      let end = fieldVal.substring(fieldVal.indexOf('-')+1)
-      list = range(parseInt(start), parseInt(end), 1).map(val => val.toString());
-      console.log("fieldVal:", fieldVal,", list:", list);
+      if(fieldVal.includes(','))
+        list = fieldVal.split(',').map(val => convertRangeToList(val,replaceSeven)).flat(1);
+      else {
+        let start = fieldVal.substring(0, fieldVal.indexOf('-'));
+        let end = fieldVal.substring(fieldVal.indexOf('-') + 1)
+        list = range(parseInt(start), parseInt(end), 1).map(val => val.toString());
+      }
     }
+    console.log("fieldVal:", fieldVal,", list:", list);
     if(replaceSeven) {
       let index = list.indexOf('7');
       if (index !== -1) {
