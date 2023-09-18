@@ -89,6 +89,10 @@ function App() {
     let update4 = fillRowFromFieldNonPeriodic(fields[3], errorLabel, 'selectedMonth');
     let update5 = fillRowFromFieldNonPeriodic(fields[4], errorLabel, 'selectedDayOfWeek', true);
     let update6 = {'selectedPeriod': 'year' };
+    if(Object.keys(update1).length < 1 || Object.keys(update2).length < 1 || Object.keys(update3).length < 1
+      || Object.keys(update4).length < 1 || Object.keys(update5).length < 1 || Object.keys(update6).length < 1)
+      return;
+    document.getElementById("errorLabel").innerText = "";
     let newData = { ...formData, ...update1, ...update2, ...update3, ...update4, ...update5, ...update6 };
     console.log(newData)
     setFormData(newData);
@@ -125,7 +129,7 @@ function App() {
     let newValues = {};
     if (field.includes('/')) {
       if (!field.startsWith('*/')) {
-        errorLabel.innerText = "Error: cron format string is richer than supported";
+        errorLabel.innerText = "Error: cron string format is richer than supported";
       } else {
         newValues = { ...newValues,[option]: "every" };
         newValues = {...newValues,[every]: field.substring(2)};
@@ -147,7 +151,7 @@ function App() {
   const fillRowFromFieldNonPeriodic = (field, errorLabel, at, replaceSeven= false) => {
     let newValues = {};
     if (field.includes('/')) {
-        errorLabel.innerText = "Error: cron format string is richer than supported";
+        errorLabel.innerText = "Error: cron string format is richer than supported";
     } else {
       if(field==="*")
         newValues = {...newValues, [at]: []};
@@ -300,7 +304,7 @@ function App() {
             </div>
           </div>
           <div className="form-row">
-            <label className="col-form-label" id="errorLabel"></label>
+            <label className="col-form-label" id="errorLabel" style={{ color:'red' }}></label>
           </div>
         </div>
       </div>
