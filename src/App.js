@@ -11,14 +11,14 @@ function App() {
     selectedMonth: [],
     monthOption: "on",
     daysOfMonth: [],
-    everyNthDay: "",
+    everyNthDay: "1",
     selectedDayOfWeek: [],
     hourOption: "at",
     selectedAtHours: [],
-    selectedEveryHours: "",
+    selectedEveryHours: "1",
     minuteOption: "at",
-    selectedAtMinutes: [""],
-    selectedEveryMinutes: "",
+    selectedAtMinutes: [],
+    selectedEveryMinutes: "1",
     cronString: ""
   });
   // TODO: Refactor to use periodOptions everywhere needed
@@ -43,11 +43,25 @@ function App() {
   const handleSubmit = (event) => {
     event.preventDefault();
     formData.cronString = [
-      formData.minuteOption === "at" ? formData.selectedAtMinutes.join(',') : "*/" + formData.selectedEveryMinutes,
-      periodOptions.indexOf(formData.selectedPeriod) > 0 ? formData.hourOption === "at" ? formData.selectedAtHours.join(',') : "*/" + formData.selectedEveryHours : "*",
-      periodOptions.indexOf(formData.selectedPeriod) > 2 ? formData.monthOption === "on" ? formData.daysOfMonth.join(',') : "*/" + formData.everyNthDay : "*",
-      periodOptions.indexOf(formData.selectedPeriod) > 3 ? formData.selectedMonth.join(',') : "*",
-      periodOptions.indexOf(formData.selectedPeriod) > 1 ? formData.selectedDayOfWeek.sort().join(',') : "*",
+      formData.minuteOption === "at" ?
+        (formData.selectedAtMinutes.length > 0 ? formData.selectedAtMinutes.join(',') : "*")
+        : "*/" + formData.selectedEveryMinutes,
+      periodOptions.indexOf(formData.selectedPeriod) > 0 ?
+        formData.hourOption === "at" ?
+          (formData.selectedAtHours.length > 0 ? formData.selectedAtHours.join(','): "*")
+          : "*/" + formData.selectedEveryHours
+        : "*",
+      periodOptions.indexOf(formData.selectedPeriod) > 2 ?
+        formData.monthOption === "on" ?
+          (formData.daysOfMonth.length > 0 ? formData.daysOfMonth.join(',') : "*")
+          : "*/" + formData.everyNthDay
+        : "*",
+      periodOptions.indexOf(formData.selectedPeriod) > 3 ?
+        (formData.selectedMonth.length > 0 ? formData.selectedMonth.join(',') : "*")
+        : "*",
+      periodOptions.indexOf(formData.selectedPeriod) > 1 ?
+        (formData.selectedDayOfWeek.length > 0 ? formData.selectedDayOfWeek.sort().join(',') : "*")
+        : "*",
     ].join(' ');
     document.getElementById("errorLabel").value = "";
     document.getElementById("cronStrIO").value = formData.cronString;
@@ -108,8 +122,14 @@ function App() {
         newValues = {...newValues,[every]: field.substring(2)};
       }
     } else {
-      newValues = {...newValues, [option]: preposition };
-      newValues = {...newValues, [at]: convertRangeToList(field)};
+      if(field==="*")
+      {
+        newValues = {...newValues, [option]: preposition };
+        newValues = {...newValues, [at]: []};
+      } else {
+        newValues = {...newValues, [option]: preposition};
+        newValues = {...newValues, [at]: convertRangeToList(field)};
+      }
     }
     console.log(newValues);
     return newValues;
@@ -120,7 +140,10 @@ function App() {
     if (field.includes('/')) {
         errorLabel.value = "Error: cron format string is richer than supported";
     } else {
-      newValues = {...newValues, [at]: convertRangeToList(field)};
+      if(field==="*")
+        newValues = {...newValues, [at]: []};
+      else
+        newValues = {...newValues, [at]: convertRangeToList(field)};
     }
     return newValues;
   };
