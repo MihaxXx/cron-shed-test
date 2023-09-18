@@ -1,4 +1,9 @@
 import {useState} from "react";
+import $ from 'jquery';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min";
+import "bootstrap-select/dist/css/bootstrap-select.min.css";
+import "bootstrap-select/dist/js/bootstrap-select.min";
 
 function App() {
   const [formData, setFormData] = useState({
@@ -12,7 +17,7 @@ function App() {
     selectedAtHours: [],
     selectedEveryHours: "",
     minuteOption: "at",
-    selectedAtMinutes: [],
+    selectedAtMinutes: [""],
     selectedEveryMinutes: "",
     cronString: ""
   });
@@ -56,19 +61,27 @@ function App() {
     event.preventDefault();
     let errorLabel = document.getElementById("errorLabel");
     let cronStrIO = document.getElementById("cronStrIO");
-    if (!validateCronExpr(cronStrIO.value))
+    /*if (!validateCronExpr(cronStrIO.value))
     {
       errorLabel.value = "Error: invalid cron format string";
+      console.log("Error: invalid cron format string");
       return;
-    }
+    }*/
     console.log('validated')
     let fields = cronStrIO.value.split(' ');
-    fillRowFromField(fields[0], errorLabel, 'minuteOption', 'selectedEveryMinutes', 'selectedAtMinutes', 'at');
-    fillRowFromField(fields[1], errorLabel, 'hourOption', 'selectedEveryHours', 'selectedAtHours', 'at');
-    fillRowFromField(fields[2], errorLabel, 'hourOption', 'everyNthDay', 'daysOfMonth', 'on');
-    fillRowFromFieldNonPeriodic(fields[3], errorLabel, 'selectedMonth');
-    fillRowFromFieldNonPeriodic(fields[4], errorLabel, 'selectedDayOfWeek');
-    setFormData({ ...formData,'selectedPeriod': 'year' });
+    let update1 = fillRowFromField(fields[0], errorLabel, 'minuteOption', 'selectedEveryMinutes', 'selectedAtMinutes', 'at');
+    let update2 = fillRowFromField(fields[1], errorLabel, 'hourOption', 'selectedEveryHours', 'selectedAtHours', 'at');
+    let update3 = fillRowFromField(fields[2], errorLabel, 'monthOption', 'everyNthDay', 'daysOfMonth', 'on');
+    let update4 = fillRowFromFieldNonPeriodic(fields[3], errorLabel, 'selectedMonth');
+    let update5 = fillRowFromFieldNonPeriodic(fields[4], errorLabel, 'selectedDayOfWeek');
+    let update6 = {'selectedPeriod': 'year' };
+    let newData = { ...formData, ...update1, ...update2, ...update3, ...update4, ...update5, ...update6 };
+    console.log(newData)
+    setFormData(newData);
+    //Workaround to force update bootstrap-select multiple pickers because they're dummy
+    $( document ).ready(function() {
+      $('.selectpicker').selectpicker('render')
+    });
   }
 
   const validateCronExpr = (str) => str.trim().match(/((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5})/)?.[0] === str.trim()
@@ -85,29 +98,30 @@ function App() {
   }
 
   function fillRowFromField(field, errorLabel, option, every, at, preposition) {
+    let newValues = {};
     if (field.includes('/')) {
       if (!field.startsWith('*/')) {
         errorLabel.value = "Error: cron format string is richer than supported";
-        return;
       } else {
-        setFormData({ ...formData,[option]: "every" });
-        setFormData({ ...formData,[every]: field.substring(2) });
+        newValues = { ...newValues,[option]: "every" };
+        newValues = {...newValues,[every]: field.substring(2)};
       }
     } else {
-      setFormData({ ...formData,[option]: preposition });
-      let t = { ...formData,[at]: convertRangeToList(field) };
-      setFormData(t);
+      newValues = {...newValues, [option]: preposition };
+      newValues = {...newValues, [at]: convertRangeToList(field)};
     }
+    console.log(newValues);
+    return newValues;
   }
 
   const fillRowFromFieldNonPeriodic = (field, errorLabel, at) => {
+    let newValues = {};
     if (field.includes('/')) {
         errorLabel.value = "Error: cron format string is richer than supported";
-        return;
     } else {
-      let t = { ...formData,[at]: convertRangeToList(field) };
-      setFormData(t);
+      newValues = {...newValues, [at]: convertRangeToList(field)};
     }
+    return newValues;
   };
   return (
     <div className="container">
@@ -131,7 +145,7 @@ function App() {
             <div className="form-group row" style={{display: formData.selectedPeriod === "year" ? 'flex' : 'none'}}>
               <label className="col-form-label">in</label>
               <div className="col-sm-4">
-                <select className="selectpicker form-control" multiple={true} name="selectedMonth"
+                <select className="selectpicker" multiple={true} name="selectedMonth"
                         value={formData.selectedMonth}
                         onChange={handleMultipleChange}>
                   <option value="1">January</option>
@@ -159,7 +173,7 @@ function App() {
                 </select>
               </div>
               <div className="col-sm-4 ml-1" style={{display: formData.monthOption === "on" ? 'block' : 'none'}}>
-                <select className="selectpicker form-control" name="daysOfMonth" value={formData.daysOfMonth}
+                <select className="selectpicker" name="daysOfMonth" value={formData.daysOfMonth}
                         multiple={true} onChange={handleMultipleChange}>
                   {daysOptions}
                 </select>
@@ -177,7 +191,7 @@ function App() {
                  style={{display: (formData.selectedPeriod === "year" || formData.selectedPeriod === "month" || formData.selectedPeriod === "week") ? 'flex' : 'none'}}>
               <label className="col-form-label">on</label>
               <div className="col-sm-4">
-                <select className="selectpicker form-control" multiple={true} name="selectedDayOfWeek"
+                <select className="selectpicker" multiple={true} name="selectedDayOfWeek"
                         value={formData.selectedDayOfWeek}
                         onChange={handleMultipleChange}>
                   <option value="1">Monday</option>
@@ -200,7 +214,7 @@ function App() {
                 </select>
               </div>
               <div className="col-sm-4" style={{display: formData.hourOption === "at" ? 'block' : 'none'}}>
-                <select className="selectpicker form-control" name="selectedAtHours" value={formData.selectedAtHours}
+                <select className="selectpicker" name="selectedAtHours" value={formData.selectedAtHours}
                         multiple={true} onChange={handleMultipleChange}>
                   {hourOptions}
                 </select>
@@ -223,7 +237,7 @@ function App() {
                 </select>
               </div>
               <div className="col-sm-4" style={{display: formData.minuteOption === "at" ? 'block' : 'none'}}>
-                <select className="selectpicker form-control" name="selectedAtMinutes"
+                <select className="selectpicker" name="selectedAtMinutes"
                         value={formData.selectedAtMinutes}
                         multiple={true} onChange={handleMultipleChange}>
                   {minutesOptions}
@@ -261,4 +275,7 @@ function App() {
   )
 }
 
+//workaround to make bootstrap-select look in same style as bootstrap's select
+$.fn.selectpicker.Constructor.DEFAULTS.styleBase = 'form-control';
+$.fn.selectpicker.Constructor.DEFAULTS.style = '';
 export default App;
