@@ -61,12 +61,12 @@ function App() {
     event.preventDefault();
     let errorLabel = document.getElementById("errorLabel");
     let cronStrIO = document.getElementById("cronStrIO");
-    /*if (!validateCronExpr(cronStrIO.value))
+    if (!validateCronExpr(cronStrIO.value))
     {
       errorLabel.value = "Error: invalid cron format string";
       console.log("Error: invalid cron format string");
       return;
-    }*/
+    }
     console.log('validated')
     let fields = cronStrIO.value.split(' ');
     let update1 = fillRowFromField(fields[0], errorLabel, 'minuteOption', 'selectedEveryMinutes', 'selectedAtMinutes', 'at');
@@ -84,7 +84,8 @@ function App() {
     });
   }
 
-  const validateCronExpr = (str) => str.trim().match(/((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5})/)?.[0] === str.trim()
+  const cronRegEx = /^((?:\*|[0-5]?[0-9](?:(?:-[0-5]?[0-9])|(?:,[0-5]?[0-9])+)?)(?:\/[0-9]+)?)\s+((?:\*|(?:1?[0-9]|2[0-3])(?:(?:-(?:1?[0-9]|2[0-3]))|(?:,(?:1?[0-9]|2[0-3]))+)?)(?:\/[0-9]+)?)\s+((?:\*|(?:[1-9]|[1-2][0-9]|3[0-1])(?:(?:-(?:[1-9]|[1-2][0-9]|3[0-1]))|(?:,(?:[1-9]|[1-2][0-9]|3[0-1]))+)?)(?:\/[0-9]+)?)\s+((?:\*|(?:[1-9]|1[0-2])(?:(?:-(?:[1-9]|1[0-2]))|(?:,(?:[1-9]|1[0-2]))+)?)(?:\/[0-9]+)?)\s+((?:\*|[0-7](?:-[0-7]|(?:,[0-7])+)?)(?:\/[0-9]+)?)$/;
+  const validateCronExpr = (str) => str.trim().match(cronRegEx)?.[0] === str.trim()
   const range = (start, stop, step) =>
     Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
   const convertRangeToList = (fieldVal) => {
