@@ -83,12 +83,11 @@ function App() {
     }
     console.log('validated')
     let fields = cronStrIO.value.split(' ');
-    if(fields[4]==="7") fields[4]="0";//support reading sunday not only as 0 but as 7 too
     let update1 = fillRowFromField(fields[0], errorLabel, 'minuteOption', 'selectedEveryMinutes', 'selectedAtMinutes', 'at');
     let update2 = fillRowFromField(fields[1], errorLabel, 'hourOption', 'selectedEveryHours', 'selectedAtHours', 'at');
     let update3 = fillRowFromField(fields[2], errorLabel, 'monthOption', 'everyNthDay', 'daysOfMonth', 'on');
     let update4 = fillRowFromFieldNonPeriodic(fields[3], errorLabel, 'selectedMonth');
-    let update5 = fillRowFromFieldNonPeriodic(fields[4], errorLabel, 'selectedDayOfWeek');
+    let update5 = fillRowFromFieldNonPeriodic(fields[4], errorLabel, 'selectedDayOfWeek', true);
     let update6 = {'selectedPeriod': 'year' };
     let newData = { ...formData, ...update1, ...update2, ...update3, ...update4, ...update5, ...update6 };
     console.log(newData)
@@ -103,14 +102,23 @@ function App() {
   const validateCronExpr = (str) => str.trim().match(cronRegEx)?.[0] === str.trim()
   const range = (start, stop, step) =>
     Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
-  const convertRangeToList = (fieldVal) => {
+  const convertRangeToList = (fieldVal, replaceSeven= false) => {
+    let list;
     if(!fieldVal.includes('-'))
-      return [fieldVal];
+      list = fieldVal.split(',');
     else {
       let start = fieldVal.substring(0, fieldVal.indexOf('-'));
       let end = fieldVal.substring(fieldVal.indexOf('-')+1)
-      return range(start, end, 1).map(val => val.toString());
+      list = range(parseInt(start), parseInt(end), 1).map(val => val.toString());
+      console.log("fieldVal:", fieldVal,", list:", list);
     }
+    if(replaceSeven) {
+      let index = list.indexOf('7');
+      if (index !== -1) {
+        list[index] = '0';
+      }
+    }
+    return [...new Set(list)];//filter unique values
   }
 
   function fillRowFromField(field, errorLabel, option, every, at, preposition) {
@@ -136,7 +144,7 @@ function App() {
     return newValues;
   }
 
-  const fillRowFromFieldNonPeriodic = (field, errorLabel, at) => {
+  const fillRowFromFieldNonPeriodic = (field, errorLabel, at, replaceSeven= false) => {
     let newValues = {};
     if (field.includes('/')) {
         errorLabel.innerText = "Error: cron format string is richer than supported";
@@ -144,7 +152,7 @@ function App() {
       if(field==="*")
         newValues = {...newValues, [at]: []};
       else
-        newValues = {...newValues, [at]: convertRangeToList(field)};
+        newValues = {...newValues, [at]: convertRangeToList(field, replaceSeven)};
     }
     return newValues;
   };
