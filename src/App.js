@@ -7,7 +7,7 @@ import "bootstrap-select/dist/js/bootstrap-select.min";
 
 function App() {
   const [formData, setFormData] = useState({
-    selectedPeriod: "year",
+    selectedPeriod: "4",
     selectedMonth: [],
     monthOption: "on",
     daysOfMonth: [],
@@ -21,8 +21,8 @@ function App() {
     selectedEveryMinutes: "1",
     cronString: ""
   });
-  // TODO: Refactor to use periodOptions everywhere needed
-  let periodOptions = ["hour", "day", "week", "month", "year"];
+  let periodOptions = ["Hour", "Day", "Week", "Month", "Year"].reverse()
+    .map((val, i, arr) => <option value={arr.length - 1 - i} key={arr.length - 1 - i}>{val}</option>)
   let daysOptions = [...Array(31 + 1).keys()].slice(1).map(val => <option value={val} key={val}>{val}</option>);
   let hourOptions = [...Array(24).keys()].map(val => <option value={val}
                                                              key={val}>{val.toString().padStart(2, '0')}</option>);
@@ -46,20 +46,20 @@ function App() {
       formData.minuteOption === "at" ?
         (formData.selectedAtMinutes.length > 0 ? formData.selectedAtMinutes.join(',') : "*")
         : "*/" + formData.selectedEveryMinutes,
-      periodOptions.indexOf(formData.selectedPeriod) > 0 ?
+      formData.selectedPeriod > 0 ?
         formData.hourOption === "at" ?
           (formData.selectedAtHours.length > 0 ? formData.selectedAtHours.join(',') : "*")
           : "*/" + formData.selectedEveryHours
         : "*",
-      periodOptions.indexOf(formData.selectedPeriod) > 2 ?
+      formData.selectedPeriod > 2 ?
         formData.monthOption === "on" ?
           (formData.daysOfMonth.length > 0 ? formData.daysOfMonth.join(',') : "*")
           : "*/" + formData.everyNthDay
         : "*",
-      periodOptions.indexOf(formData.selectedPeriod) > 3 ?
+      formData.selectedPeriod > 3 ?
         (formData.selectedMonth.length > 0 ? formData.selectedMonth.join(',') : "*")
         : "*",
-      periodOptions.indexOf(formData.selectedPeriod) > 1 ?
+      formData.selectedPeriod > 1 ?
         (formData.selectedDayOfWeek.length > 0 ? formData.selectedDayOfWeek.sort().join(',') : "*")
         : "*",
     ].join(' ');
@@ -87,7 +87,7 @@ function App() {
     let update3 = fillRowFromField(fields[2], errorLabel, 'monthOption', 'everyNthDay', 'daysOfMonth', 'on');
     let update4 = fillRowFromFieldNonPeriodic(fields[3], errorLabel, 'selectedMonth');
     let update5 = fillRowFromFieldNonPeriodic(fields[4], errorLabel, 'selectedDayOfWeek', true);
-    let update6 = {'selectedPeriod': 'year'};
+    let update6 = {'selectedPeriod': '4'};
     if (Object.keys(update1).length < 1 || Object.keys(update2).length < 1 || Object.keys(update3).length < 1
       || Object.keys(update4).length < 1 || Object.keys(update5).length < 1 || Object.keys(update6).length < 1)
       return;
@@ -170,20 +170,17 @@ function App() {
                 <div className="col-sm-3">
                   <select className="form-control" name="selectedPeriod" value={formData.selectedPeriod}
                           onChange={handleChange}>
-                    <option value="year">Year</option>
-                    <option value="month">Month</option>
-                    <option value="week">Week</option>
-                    <option value="day">Day</option>
-                    <option value="hour">Hour</option>
+                    {periodOptions}
                   </select>
                 </div>
               </div>
 
-              <div className="form-group row" style={{display: formData.selectedPeriod === "year" ? 'flex' : 'none'}}>
+              <div className="form-group row" style={{display: formData.selectedPeriod > 3 ? 'flex' : 'none'}}>
                 <label className="col-form-label">in</label>
                 <div className="col-sm-4">
                   <select className="selectpicker" multiple={true} name="selectedMonth"
-                          value={formData.selectedMonth} onChange={handleMultipleChange} data-none-selected-text="Month(s)">
+                          value={formData.selectedMonth} data-none-selected-text="Month(s)"
+                          onChange={handleMultipleChange}>
                     <option value="1">January</option>
                     <option value="2">February</option>
                     <option value="3">March</option>
@@ -200,7 +197,7 @@ function App() {
                 </div>
               </div>
               <div className="form-group row"
-                   style={{display: (formData.selectedPeriod === "year" || formData.selectedPeriod === "month") ? 'flex' : 'none'}}>
+                   style={{display: (formData.selectedPeriod > 2) ? 'flex' : 'none'}}>
                 <div className="col-sm-2-ml-0">
                   <select className="form-control" name="monthOption" value={formData.monthOption}
                           onChange={handleChange}>
@@ -224,7 +221,7 @@ function App() {
                        className="col-form-label">days</label>
               </div>
               <div className="form-group row"
-                   style={{display: (formData.selectedPeriod === "year" || formData.selectedPeriod === "month" || formData.selectedPeriod === "week") ? 'flex' : 'none'}}>
+                   style={{display: (formData.selectedPeriod > 1) ? 'flex' : 'none'}}>
                 <label className="col-form-label">on</label>
                 <div className="col-sm-4">
                   <select className="selectpicker" multiple={true} name="selectedDayOfWeek"
@@ -241,7 +238,7 @@ function App() {
                 </div>
               </div>
               <div className="form-group row"
-                   style={{display: (formData.selectedPeriod !== "hour") ? 'flex' : 'none'}}>
+                   style={{display: (formData.selectedPeriod > 0) ? 'flex' : 'none'}}>
                 <div className="col-sm-2-ml-0">
                   <select className="form-control" name="hourOption" value={formData.hourOption}
                           onChange={handleChange}>
