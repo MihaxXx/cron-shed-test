@@ -44,23 +44,23 @@ function App() {
     event.preventDefault();
     formData.cronString = [
       formData.minutesOption === "at" ?
-        (formData.minutes.length > 0 ? formData.minutes.join(',') : "*")
+        (formData.minutes.length > 0 ? convertArrayToRangeOrEnumeration(formData.minutes) : "*")
         : "*/" + formData.everyNthMinute,
       formData.period > 0 ?
         formData.hoursOption === "at" ?
-          (formData.hours.length > 0 ? formData.hours.join(',') : "*")
+          (formData.hours.length > 0 ? convertArrayToRangeOrEnumeration(formData.hours) : "*")
           : "*/" + formData.everyNthHour
         : "*",
       formData.period > 2 ?
         formData.daysOption === "on" ?
-          (formData.days.length > 0 ? formData.days.join(',') : "*")
+          (formData.days.length > 0 ? convertArrayToRangeOrEnumeration(formData.days) : "*")
           : "*/" + formData.everyNthDay
         : "*",
       formData.period > 3 ?
-        (formData.months.length > 0 ? formData.months.join(',') : "*")
+        (formData.months.length > 0 ? convertArrayToRangeOrEnumeration(formData.months) : "*")
         : "*",
       formData.period > 1 ?
-        (formData.daysOfWeek.length > 0 ? formData.daysOfWeek.sort().join(',') : "*")
+        (formData.daysOfWeek.length > 0 ? convertArrayToRangeOrEnumeration(formData.daysOfWeek) : "*")
         : "*",
     ].join(' ');
     document.getElementById("errorLabel").innerText = "";
@@ -158,6 +158,13 @@ function App() {
     }
     return newValues;
   };
+  const convertArrayToRangeOrEnumeration = (array) => {
+    let list = [...new Set(array)].map(s => parseInt(s)).sort((a,b) => a - b)
+    if (list[list.length-1]-list[0]+1===list.length)
+      return list[0].toString()+'-'+list[list.length-1].toString();
+    else
+      return array.join(',');
+  }
   return (
     <div className="container">
       <div className="row mt-5">
