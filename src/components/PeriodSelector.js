@@ -2,7 +2,9 @@ import * as PropTypes from "prop-types";
 
 export function PeriodSelector(props) {
   let periodOptions = ["Hour", "Day", "Week", "Month", "Year"].reverse()
-    .map((val, i, arr) => <option value={arr.length - 1 - i} key={arr.length - 1 - i}>{val}</option>)
+    .map((val, i, arr) =>
+      <option value={arr.length - 1 - i} key={arr.length - 1 - i}>{val}</option>)
+
   return <div className="form-group row">
     <label className="col-form-label">Every</label>
     <div className="col-sm-3">

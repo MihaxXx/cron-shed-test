@@ -2,6 +2,7 @@ import * as PropTypes from "prop-types";
 
 export function MinutesSelector(props) {
   let minutesOptions = [...Array(60).keys()].map(val => <option value={val} key={val}>{val}</option>);
+
   return <div className="form-group row"
               style={{display: "flex"}}>
     <div className="col-sm-2-ml-0">

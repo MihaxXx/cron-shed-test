@@ -3,6 +3,7 @@ import * as PropTypes from "prop-types";
 export function HoursSelector(props) {
   let hoursOptions = [...Array(24).keys()].map(val =>
     <option value={val} key={val}>{val.toString().padStart(2, '0')}</option>);
+
   return <div className="form-group row"
               style={{display: (props.period > 0) ? "flex" : "none"}}>
     <div className="col-sm-2-ml-0">

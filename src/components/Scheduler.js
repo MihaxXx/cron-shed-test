@@ -44,7 +44,7 @@ function Scheduler(props) {
     console.log(name + ': ' + value)
   };
 
-  const handleSubmit = (event) => {
+  const handleSave = (event) => {
     event.preventDefault();
     formData.cronString = [
       formData.minutesOption === "at" ?
@@ -75,7 +75,7 @@ function Scheduler(props) {
     );
   };
 
-  const handleButtonClick = (event) => {
+  const handleLoad = (event) => {
     event.preventDefault();
     let errorLabel = document.getElementById(props.errorLabel);
     let cronStrIO = document.getElementById(props.cronStrIO);
@@ -86,17 +86,17 @@ function Scheduler(props) {
     }
     console.log('validated')
     let fields = cronStrIO.value.split(' ');
-    let update1 = fillRowFromField(fields[0], errorLabel, 'minutesOption', 'everyNthMinute', 'minutes', 'at');
-    let update2 = fillRowFromField(fields[1], errorLabel, 'hoursOption', 'everyNthHour', 'hours', 'at');
-    let update3 = fillRowFromField(fields[2], errorLabel, 'daysOption', 'everyNthDay', 'days', 'on');
-    let update4 = fillRowFromFieldNonPeriodic(fields[3], errorLabel, 'months');
-    let update5 = fillRowFromFieldNonPeriodic(fields[4], errorLabel, 'daysOfWeek', true);
-    let update6 = {'period': '4'};
-    if (Object.keys(update1).length < 1 || Object.keys(update2).length < 1 || Object.keys(update3).length < 1
-      || Object.keys(update4).length < 1 || Object.keys(update5).length < 1 || Object.keys(update6).length < 1)
+    let minutes = getValuesFromCronField(fields[0], errorLabel, 'minutesOption', 'everyNthMinute', 'minutes', 'at');
+    let hours = getValuesFromCronField(fields[1], errorLabel, 'hoursOption', 'everyNthHour', 'hours', 'at');
+    let days = getValuesFromCronField(fields[2], errorLabel, 'daysOption', 'everyNthDay', 'days', 'on');
+    let months = getValuesFromCronFieldNonPeriodic(fields[3], errorLabel, 'months');
+    let daysOfWeek = getValuesFromCronFieldNonPeriodic(fields[4], errorLabel, 'daysOfWeek', true);
+    let period = {'period': '4'};
+    if (Object.keys(minutes).length < 1 || Object.keys(hours).length < 1 || Object.keys(days).length < 1
+      || Object.keys(months).length < 1 || Object.keys(daysOfWeek).length < 1 || Object.keys(period).length < 1)
       return;
     document.getElementById(props.errorLabel).innerText = "";
-    let newData = {...formData, ...update1, ...update2, ...update3, ...update4, ...update5, ...update6};
+    let newData = {...formData, ...minutes, ...hours, ...days, ...months, ...daysOfWeek, ...period};
     console.log(newData)
     setFormData(newData);
     //Workaround to force update bootstrap-select multiple pickers because they're dummy
@@ -104,18 +104,18 @@ function Scheduler(props) {
       $('.selectpicker').selectpicker('render')
     });
   }
+
   //https://regexr.com/3bvl1, needs change to allow list of ranges
   const cronRegEx = /^((?:\*|[0-5]?[0-9](?:(?:-[0-5]?[0-9])|(?:,[0-5]?[0-9])+)?)(?:\/[0-9]+)?)\s+((?:\*|(?:1?[0-9]|2[0-3])(?:(?:-(?:1?[0-9]|2[0-3]))|(?:,(?:1?[0-9]|2[0-3]))+)?)(?:\/[0-9]+)?)\s+((?:\*|(?:[1-9]|[1-2][0-9]|3[0-1])(?:(?:-(?:[1-9]|[1-2][0-9]|3[0-1]))|(?:,(?:[1-9]|[1-2][0-9]|3[0-1]))+)?)(?:\/[0-9]+)?)\s+((?:\*|(?:[1-9]|1[0-2])(?:(?:-(?:[1-9]|1[0-2]))|(?:,(?:[1-9]|1[0-2]))+)?)(?:\/[0-9]+)?)\s+((?:\*|[0-7](?:-[0-7]|(?:,[0-7])+)?)(?:\/[0-9]+)?)$/;
   const validateCronExpr = (str) => str.trim().match(cronRegEx)?.[0] === str.trim()
+
   const range = (start, stop, step) =>
     Array.from({length: (stop - start) / step + 1}, (_, i) => start + i * step);
-
   function convertRangeToList(fieldVal) {
     let start = fieldVal.substring(0, fieldVal.indexOf('-'));
     let end = fieldVal.substring(fieldVal.indexOf('-') + 1)
     return range(parseInt(start), parseInt(end), 1).map(val => val.toString());
   }
-
   const convertFieldNumbersToList = (fieldVal, replaceSeven = false) => {
     let list = fieldVal.split(',').map(val => val.includes('-') ? convertRangeToList(val) : [val]).flat(1).sort();
     console.log("fieldVal:", fieldVal, ", list:", list);
@@ -128,7 +128,7 @@ function Scheduler(props) {
     return [...new Set(list)];//filter unique values
   }
 
-  function fillRowFromField(field, errorLabel, option, every, at, preposition) {
+  const getValuesFromCronField = (field, errorLabel, option, every, at, preposition) => {
     let newValues = {};
     if (field.includes('/')) {
       if (!field.startsWith('*/')) {
@@ -150,7 +150,7 @@ function Scheduler(props) {
     return newValues;
   }
 
-  const fillRowFromFieldNonPeriodic = (field, errorLabel, at, replaceSeven = false) => {
+  const getValuesFromCronFieldNonPeriodic = (field, errorLabel, at, replaceSeven = false) => {
     let newValues = {};
     if (field.includes('/')) {
       errorLabel.innerText = "Error: cron string format is richer than supported";
@@ -162,6 +162,7 @@ function Scheduler(props) {
     }
     return newValues;
   };
+
   const convertArrayToRangeOrEnumeration = (array) => {
     let list = [...new Set(array)].map(s => parseInt(s)).sort((a, b) => a - b)
     if (list.length > 1 && (list[list.length - 1] - list[0] + 1 === list.length))
@@ -169,8 +170,9 @@ function Scheduler(props) {
     else
       return array.join(',');
   }
+
   return (
-    <form className="card mb-3" onSubmit={handleSubmit}>
+    <form className="card mb-3" onSubmit={handleSave}>
       <h5 className="card-header">Cron Scheduler</h5>
       <div className="card-body pl-5 pr-5">
         <PeriodSelector period={formData.period} onChange={handleChange}/>
@@ -187,7 +189,7 @@ function Scheduler(props) {
           <button className="btn btn-primary" type="submit">
             Save
           </button>
-          <button className="btn btn-primary ml-3" type="button" onClick={handleButtonClick}>
+          <button className="btn btn-primary ml-3" type="button" onClick={handleLoad}>
             Load
           </button>
         </div>

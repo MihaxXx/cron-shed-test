@@ -2,6 +2,7 @@ import * as PropTypes from "prop-types";
 
 export function DaysSelector(props) {
   let daysOptions = [...Array(31 + 1).keys()].slice(1).map(val => <option value={val} key={val}>{val}</option>);
+
   return <div className="form-group row"
               style={{display: (props.period > 2) ? "flex" : "none"}}>
     <div className="col-sm-2-ml-0">

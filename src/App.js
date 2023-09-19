@@ -1,7 +1,6 @@
 import Scheduler from './components/Scheduler';
 
 function App() {
-
   return (
     <div className="container">
       <div className="row mt-5">
